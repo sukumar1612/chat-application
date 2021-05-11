@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>user_char</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="home/css/styles.css">
+</head>
+
+<body>
+    <div class="table-responsive">
+        <table class="table" id="myTable">
+            <thead>
+                <tr>
+                    <th>User List</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+
+     <script>
+      async function postFormDataAsJson({ url }) {
+
+    var jwt;
+	var x=document.cookie.split(";");
+
+    for (i of x){
+        if(i.includes("JWT ")){
+            jwt=i;
+            break;
+        }
+    }
+    console.log(jwt)
+
+	const fetchOptions = {
+		method: "POST",
+		headers: {
+			"Authorization": jwt,
+			Accept: "application/json",
+		}
+	};
+
+	const response = await fetch(url, fetchOptions);
+
+	if (!response.ok) {
+		const errorMessage = await response.text();
+		throw new Error(errorMessage);
+	}
+
+	return response.json();
+}
+
+async function handleFormSubmit(event) {
+	event.preventDefault();
+
+	const url = window.location.href;
+	var x=url.split("/");
+	console.log(x[x.length-1])
+
+	try {
+		const responseData = await postFormDataAsJson({ url });
+
+		console.log({ responseData });
+		if("names" in responseData)
+        {
+          for (i of responseData["names"])
+          {
+            var table = document.getElementById("myTable");
+            var row = table.insertRow(1);
+            var cell = row.insertCell(0);
+            var url1= url+ '/' +String(i[0]);
+            if(i[0]!=x[x.length-1])
+            {
+              cell.innerHTML='<a href="'+url1+'">'+i[1]+'</a>';
+            }
+          }
+        }
+	} catch (error) {
+		console.error(error);
+	}
+}
+    window.addEventListener("load", handleFormSubmit);
+  </script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+
+</html>
