@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/login/fonts/ionicons.min.css">
+    <link rel="stylesheet" href="/static/login/css/Login-Form-Clean.css">
+    <link rel="stylesheet" href="/static/login/css/styles.css">
+    <style>
+        .already {
+            display: block;
+            text-align: center;
+            font-size: 12px;
+            color: #6f7a85;
+            opacity: 0.9;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="login-clean">
+        <form method="post" id="login-form">
+            <h2 class="sr-only">Login Form</h2>
+            <div class="illustration"><i class="icon ion-ios-navigate"></i>
+                <h2 class="text-center"><strong>Chat app</strong></h2>
+            </div>
+            <div class="form-group"><input class="form-control" type="text" name="username" placeholder="Username"></div>
+            <div class="form-group"><input class="form-control" type="password" name="password" placeholder="Password"></div>
+            <div class="form-group"><button class="btn btn-primary btn-block" type="submit" >Log In</button></div>
+	    <a class="already" onclick="newLocation()">Don't have an account? Register here.</a>
+        </form>
+    </section>
+    <script>
+    var uid=0;
+    var success=0;
+
+        async function postFormDataAsJson({ url, formData }) {
+	const plainFormData = Object.fromEntries(formData.entries());
+	const formDataJsonString = JSON.stringify(plainFormData);
+
+	const fetchOptions = {
+		method: "POST",
+		headers: {
+		    	"Content-Type": "application/json",
+		    	Accept: "application/json",
+	    	},
+		    body: formDataJsonString,
+	    };
+
+	    const response = await fetch(url, fetchOptions);
+
+	    if (!response.ok) {
+		    const errorMessage = await response.text();
+		    alert("invaid username or password")
+		    throw new Error(errorMessage);
+
+		    window.location.href;
+    	}
+
+
+	    return response.json();
+    }
+
+        async function handleFormSubmit(event) {
+	    event.preventDefault();
+
+	    const form = event.currentTarget;
+	    const url = window.location.origin + "/auth";
+
+	    try {
+		    const formData = new FormData(form);
+		    const responseData = await postFormDataAsJson({ url, formData });
+
+		    console.log( {responseData} );
+		    if("access_token" in responseData)
+            {
+                success=1;
+                alert("login successful "+responseData["access_token"]);
+                document.cookie="JWT "+responseData["access_token"]
+            }
+
+	    } catch (error) {
+		    console.error(error);
+	    }
+    }
+    async function handleFormSubmit1(event) {
+	    event.preventDefault();
+
+	    const form = event.currentTarget;
+	    const url = window.location.href;
+	   // console.log(url)
+
+	    try {
+		    const formData = new FormData(form);
+		    const responseData = await postFormDataAsJson({ url, formData });
+
+            uid=responseData['user_id']
+            if(success==1) {
+                window.location.href="/homepage/"+String(uid);
+            }
+
+	    } catch (error) {
+		    console.error(error);
+	    }
+
+    }
+
+    const exampleForm = document.getElementById("login-form");
+    exampleForm.addEventListener("submit", handleFormSubmit);
+    exampleForm.addEventListener("submit", handleFormSubmit1);
+
+    function newLocation() {
+        window.location.href="/register";
+    }
+
+    </script>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+
+</html>

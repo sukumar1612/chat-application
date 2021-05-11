@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>registeration</title>
+    <link rel="stylesheet" href="/static/register/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/register/css/Registration-Form-with-Photo.css">
+    <link rel="stylesheet" href="/static/register/css/styles.css">
+    <style>
+        .register-photo .image-holder {
+            display: table-cell;
+            width: auto;
+            background: url("/static/register/img/meeting.jpg");
+            background-size: cover;
+        }
+    </style>
+</head>
+
+<body style="height: 900px;">
+    <section class="register-photo" style="height: 900px;">
+        <div class="form-container">
+            <div class="image-holder" style="width: 600px;height: 513px;"></div>
+            <form method="post" id="register-form" style="width: 477px;height: 613px;">
+                <h2 class="text-center"><strong>Create</strong> an account.</h2>
+                <div class="form-group"><input class="form-control" id="username" type="text" name="username" placeholder="Username"></div>
+                <div class="form-group"><input class="form-control" id="email" type="email" name="email" placeholder="Email"></div>
+                <div class="form-group"><input class="form-control" id="password" type="password" name="password" placeholder="Password"></div>
+
+                <div class="form-group"><input class="form-control" type="password" name="password-repeat" placeholder="Password (repeat)"></div>
+                <div class="form-group"><button class="btn btn-primary btn-block" id="submit-form" type="submit" onclick="newLocation()">Sign Up</button></div><a class="already" onclick="newLocation()">You already have an account? Login here.</a>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        async function postFormDataAsJson({ url, formData }) {
+	const plainFormData = Object.fromEntries(formData.entries());
+	const formDataJsonString = JSON.stringify(plainFormData);
+
+	const fetchOptions = {
+		method: "POST",
+		headers: {
+		    	"Content-Type": "application/json",
+		    	Accept: "application/json",
+	    	},
+		    body: formDataJsonString,
+	    };
+
+	    const response = await fetch(url, fetchOptions);
+
+	    if (!response.ok) {
+		    const errorMessage = await response.text();
+		    throw new Error(errorMessage);
+    	}
+
+
+	    return response.json();
+    }
+
+        async function handleFormSubmit(event) {
+	    event.preventDefault();
+
+	    const form = event.currentTarget;
+	    const url = window.location.href;
+	    console.log(url)
+
+	    try {
+		    const formData = new FormData(form);
+		    const responseData = await postFormDataAsJson({ url, formData });
+
+		    console.log({responseData});
+		    if(responseData["messege"]=="success")
+            {
+                alert("user "+responseData["username"]+" successfully registered")
+            }
+	    } catch (error) {
+		    console.error(error);
+	    }
+    }
+
+    const exampleForm = document.getElementById("register-form");
+    exampleForm.addEventListener("submit", handleFormSubmit);
+    function newLocation() {
+        window.location.href="/login";
+    }
+    </script>
+
+    <script src="/static/register/js/jquery.min.js"></script>
+    <script src="/static/register/bootstrap/js/bootstrap.min.js"></script>
+</body>
+
+</html>
