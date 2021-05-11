@@ -43,7 +43,7 @@ class homepage(Resource):
     def get(self, name):
         print(name)
         headers = {'Content-Type': 'text/html'}
-        return make_response(render_template('home.html'), 200, headers)
+        return make_response(render_template('homepage.html'), 200, headers)
 
     @jwt_required()
     def post(self, name):
