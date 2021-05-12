@@ -52,7 +52,11 @@
 
 	if (!response.ok) {
 		const errorMessage = await response.text();
-		throw new Error(errorMessage);
+		console.log("invalid token");
+		alert("Invalid JWT........redirecting to login");
+        window.location.href="/login";
+        throw new Error(errorMessage);
+
 	}
 
 	return response.json();

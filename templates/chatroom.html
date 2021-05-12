@@ -1,0 +1,168 @@
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <title>Flask_Chat_App</title>
+  </head>
+  <body>
+
+    <h3 style='color: #ccc;font-size: 30px;'>No message yet..</h3>
+    <div class="message_holder"></div>
+
+    <form action="" method="POST">
+      <input type="text" class="message" placeholder="Messages"/>
+      <input type="submit"/>
+    </form>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+    <script type="text/javascript">
+      var keypair;
+      var server_publickey;
+      var user_privatekey;
+
+      //jwt auth
+      async function postFormDataAsJson({ url }) {
+
+    var jwt;
+	var x=document.cookie.split(";");
+
+    for (i of x){
+        if(i.includes("JWT ")){
+            jwt=i;
+            break;
+        }
+    }
+    console.log(jwt)
+
+	const fetchOptions = {
+		method: "POST",
+		headers: {
+			"Authorization": jwt,
+			Accept: "application/json",
+		}
+	};
+
+	const response = await fetch(url, fetchOptions);
+
+	if (!response.ok) {
+		const errorMessage = await response.text();
+		console.log("invalid token");
+		alert("Invalid JWT........redirecting to login");
+        window.location.href="/login";
+        throw new Error(errorMessage);
+
+	}
+
+	return response.json();
+}
+
+$(window).load(async function (){
+	//event.preventDefault();
+
+	const url = window.location.href;
+	var x=url.split("/");
+	console.log(x[x.length-2])
+
+	try {
+		const responseData = await postFormDataAsJson({ url });
+
+		console.log({ responseData });
+		if("names" in responseData)
+        {
+          for (i of responseData["names"])
+          {
+            if(i[0]!=x[x.length-1])
+            {
+                var table = document.getElementById("myTable");
+                var row = table.insertRow(1);
+                var cell = row.insertCell(0);
+                var url1= url+ '/' +String(i[0]);
+                cell.innerHTML='<a href="'+url1+'">'+i[1]+'</a>';
+            }
+          }
+        }
+	} catch (error) {
+		console.error(error);
+	}
+})
+
+      //websocket handling part
+
+      function encrypt_msg(msg, publickey){
+          var pki = forge.pki;
+          var publickey1 = pki.publicKeyFromPem(publickey);
+          var encrypted = publickey1.encrypt(msg, "RSA-OAEP", {
+            md: forge.md.sha256.create(),
+            mgf1: forge.mgf1.create()
+          });
+          var base64 = forge.util.encode64(encrypted);
+          return base64;
+      }
+      function decrypt_msg(msg, private){
+          var base64 = forge.util.decode64(msg);
+          var pki = forge.pki;
+          var private1 = pki.privateKeyFromPem(private);
+          var decrypted = private1.decrypt(base64, "RSA-OAEP", {
+            md: forge.md.sha256.create(),
+            mgf1: forge.mgf1.create()
+          });
+
+          return decrypted;
+      }
+
+      $(document).ready(function(){
+          var pki = forge.pki;
+          keypair=forge.rsa.generateKeyPair({ bits: 1024, e: 0x10001 });
+          var pub = pki.publicKeyToPem(keypair.publicKey);
+          user_privatekey = pki.privateKeyToPem(keypair.privateKey);
+
+          var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+          socket.on( 'connect', function() {
+            const url = window.location.href;
+	        var x=url.split("/");
+	        let userid =  String(x[x.length-2])
+
+            socket.emit( 'textmessages', {
+              userid : userid,
+              publicKey : pub
+            });
+
+          })
+          socket.on( 'connect_return', function(msg) {
+              //console.log(msg['publicKey'])
+              server_publickey=msg['publicKey']
+          })
+          var form = $( 'form' ).on( 'submit', function( e ) {
+            e.preventDefault()
+
+            const url = window.location.href;
+	        var x=url.split("/");
+
+	        let userid =  String(x[x.length-2])
+            let recepientid =  String(x[x.length-1])
+            console.log(userid, recepientid)
+            let user_input = encrypt_msg( $( 'input.message' ).val(), server_publickey)
+            //console.log(user_input)
+            socket.emit( 'sending_text', {
+              userid : userid,
+              recepientid : recepientid,
+              message : user_input
+            })
+            $( 'input.message' ).val( '' ).focus()
+          })
+
+          socket.on( 'text_response', function( msg ) {
+            console.log( msg )
+            if( typeof msg.userid !== 'undefined' ) {
+              $( 'h3' ).remove()
+              $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.userid+'</b> '+decrypt_msg(msg.message, user_privatekey)+'</div>' )
+            }
+          })
+
+      })
+    </script>
+
+  </body>
+  </html>
