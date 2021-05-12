@@ -76,10 +76,10 @@
 		    const responseData = await postFormDataAsJson({ url, formData });
 
 		    console.log( {responseData} );
-		    if("access_token" in responseData)
+            if("access_token" in responseData)
             {
                 success=1;
-                alert("login successful "+responseData["access_token"]);
+                //alert("login successful "+responseData["access_token"]);
                 document.cookie="JWT "+responseData["access_token"]
             }
 
@@ -98,9 +98,17 @@
 		    const formData = new FormData(form);
 		    const responseData = await postFormDataAsJson({ url, formData });
 
-            uid=responseData['user_id']
-            if(success==1) {
+		    if ("already_logged_in" in responseData)
+		    {
+                alert("this user is already logged in");
+            } else if(success==1) {
+		        uid=responseData['user_id']
+                alert("login successful");
                 window.location.href="/homepage/"+String(uid);
+            }
+            else
+            {
+                window.location.href
             }
 
 	    } catch (error) {
