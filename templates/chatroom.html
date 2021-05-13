@@ -16,10 +16,14 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+
     <script type="text/javascript">
-      var keypair;
-      var server_publickey;
+      var recipient_publickey;
       var user_privatekey;
+      var user_publickey;
+      var user_password;
+      var derived_key;
 
       //jwt auth
       async function postFormDataAsJson({ url }) {
@@ -33,6 +37,7 @@
             break;
         }
     }
+
     console.log(jwt)
 
 	const fetchOptions = {
@@ -87,54 +92,146 @@ $(window).load(async function (){
 	}
 })
 
-      //websocket handling part
+      //e2ee encryption functions
+function str2ab(str) {
+  const buf = new ArrayBuffer(str.length);
+  const bufView = new Uint8Array(buf);
+  for (let i = 0, strLen = str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
+}
 
-      function encrypt_msg(msg, publickey){
-          var pki = forge.pki;
-          var publickey1 = pki.publicKeyFromPem(publickey);
-          var encrypted = publickey1.encrypt(msg, "RSA-OAEP", {
-            md: forge.md.sha256.create(),
-            mgf1: forge.mgf1.create()
-          });
-          var base64 = forge.util.encode64(encrypted);
-          return base64;
-      }
-      function decrypt_msg(msg, private){
-          var base64 = forge.util.decode64(msg);
-          var pki = forge.pki;
-          var private1 = pki.privateKeyFromPem(private);
-          var decrypted = private1.decrypt(base64, "RSA-OAEP", {
-            md: forge.md.sha256.create(),
-            mgf1: forge.mgf1.create()
-          });
+function importPrivateKey(pem) {
+  // fetch the part of the PEM string between header and footer
+  const pemHeader = "-----BEGIN PRIVATE KEY-----";
+  const pemFooter = "-----END PRIVATE KEY-----";
+  const pemContents = pem.substring(pemHeader.length, pem.length - pemFooter.length);
+  // base64 decode the string to get the binary data
+  const binaryDerString = window.atob(pemContents);
+  // convert from a binary string to an ArrayBuffer
+  const binaryDer = str2ab(binaryDerString);
 
-          return decrypted;
-      }
+  return window.crypto.subtle.importKey(
+    "pkcs8",
+    binaryDer,
+     {
+      name: "ECDH",
+      namedCurve: "P-256",
+    },
+    true,
+    ["deriveKey", "deriveBits"]
+  );
+}
+ function importPublicKey(pem) {
+    // fetch the part of the PEM string between header and footer
+    const pemHeader = "-----BEGIN PUBLIC KEY-----";
+    const pemFooter = "-----END PUBLIC KEY-----";
+    const pemContents = pem.substring(pemHeader.length, pem.length - pemFooter.length);
+    // base64 decode the string to get the binary data
+    const binaryDerString = window.atob(pemContents);
+    // convert from a binary string to an ArrayBuffer
+    const binaryDer = str2ab(binaryDerString);
+
+    return window.crypto.subtle.importKey(
+      "spki",
+      binaryDer,
+      {
+      name: "ECDH",
+      namedCurve: "P-256",
+    },
+    true,
+    []
+    );
+  }
+
+async function derive_key(publicKeyJwk, privateKeyJwk){
+  const publicKey = await importPublicKey(publicKeyJwk)
+
+  const privateKey = await importPrivateKey(privateKeyJwk)
+
+  return await window.crypto.subtle.deriveKey(
+    { name: "ECDH", public: publicKey },
+    privateKey,
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["encrypt", "decrypt"]
+  );
+};
+
+      async function encrypt_data(text, derivedKey){
+  const encodedText = new TextEncoder().encode(text);
+
+  const encryptedData = await window.crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: new TextEncoder().encode("Initialization Vector") },
+    derivedKey,
+    encodedText
+  );
+
+  const uintArray = new Uint8Array(encryptedData);
+
+  const string = String.fromCharCode.apply(null, uintArray);
+
+  const base64Data = btoa(string);
+
+  return base64Data;
+};
+
+async function decrypt_data(text, derivedKey) {
+  try {
+
+    const string = atob(text);
+    const uintArray = new Uint8Array(
+      [...string].map((char) => char.charCodeAt(0))
+    );
+    const algorithm = {
+      name: "AES-GCM",
+      iv: new TextEncoder().encode("Initialization Vector"),
+    };
+    const decryptedData = await window.crypto.subtle.decrypt(
+      algorithm,
+      derivedKey,
+      uintArray
+    );
+
+    return new TextDecoder().decode(decryptedData);
+  } catch (e) {
+    return `error decrypting message: ${e}`;
+  }
+};
+
+      //websockets part
 
       $(document).ready(function(){
-          var pki = forge.pki;
-          keypair=forge.rsa.generateKeyPair({ bits: 1024, e: 0x10001 });
-          var pub = pki.publicKeyToPem(keypair.publicKey);
-          user_privatekey = pki.privateKeyToPem(keypair.privateKey);
 
           var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+          const url1 = window.location.href;
+	      var uid=url1.split("/");
+
+          user_password = window.localStorage.getItem("pass"+uid[uid.length-2])
+          console.log("password is :"+user_password)
 
           socket.on( 'connect', function() {
             const url = window.location.href;
 	        var x=url.split("/");
-	        let userid =  String(x[x.length-2])
 
             socket.emit( 'textmessages', {
-              userid : userid,
-              publicKey : pub
+              userid : String(x[x.length-2]),
+              recipientid : String(x[x.length-1])
             });
 
           })
-          socket.on( 'connect_return', function(msg) {
+          socket.on( 'connect_return', async function(msg) {
               //console.log(msg['publicKey'])
-              server_publickey=msg['publicKey']
+              recipient_publickey=msg['recipient_publickey']
+              user_publickey=msg['user_publickey']
+              user_privatekey=CryptoJS.AES.decrypt(msg['user_privatekey'], user_password).toString(CryptoJS.enc.Utf8);
+              console.log(recipient_publickey,user_publickey,user_privatekey)
+              derived_key= await derive_key(recipient_publickey, user_privatekey)
+              console.log(derived_key)
           })
-          var form = $( 'form' ).on( 'submit', function( e ) {
+          var form = $( 'form' ).on( 'submit', async function( e ) {
             e.preventDefault()
 
             const url = window.location.href;
@@ -143,8 +240,10 @@ $(window).load(async function (){
 	        let userid =  String(x[x.length-2])
             let recepientid =  String(x[x.length-1])
             console.log(userid, recepientid)
-            let user_input = encrypt_msg( $( 'input.message' ).val(), server_publickey)
-            //console.log(user_input)
+
+            let user_input = await encrypt_data($( 'input.message' ).val(), derived_key)
+            console.log("messege sent"+await decrypt_data(String(user_input), derived_key)+" "+typeof(user_input))
+
             socket.emit( 'sending_text', {
               userid : userid,
               recepientid : recepientid,
@@ -153,11 +252,12 @@ $(window).load(async function (){
             $( 'input.message' ).val( '' ).focus()
           })
 
-          socket.on( 'text_response', function( msg ) {
+          socket.on( 'text_response', async function( msg ) {
             console.log( msg )
             if( typeof msg.userid !== 'undefined' ) {
               $( 'h3' ).remove()
-              $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.userid+'</b> '+decrypt_msg(msg.message, user_privatekey)+'</div>' )
+              var mess=await decrypt_data(String(msg['message']), derived_key);
+              $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.userid+'</b> '+ mess +'</div>' )
             }
           })
 

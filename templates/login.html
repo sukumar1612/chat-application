@@ -34,12 +34,18 @@
 	    <a class="already" onclick="newLocation()">Don't have an account? Register here.</a>
         </form>
     </section>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+    <script scr="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl/1.0.2/nacl-fast.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
     <script>
     var uid=0;
     var success=0;
 
         async function postFormDataAsJson({ url, formData }) {
 	const plainFormData = Object.fromEntries(formData.entries());
+	plainFormData['password']=CryptoJS.SHA256(plainFormData['password']).toString(CryptoJS.enc.Hex);
 	const formDataJsonString = JSON.stringify(plainFormData);
 
 	const fetchOptions = {
@@ -71,6 +77,7 @@
 	    const form = event.currentTarget;
 	    const url = window.location.origin + "/auth";
 
+
 	    try {
 		    const formData = new FormData(form);
 		    const responseData = await postFormDataAsJson({ url, formData });
@@ -80,7 +87,9 @@
             {
                 success=1;
                 //alert("login successful "+responseData["access_token"]);
+                var plainFormData = Object.fromEntries(formData.entries());
                 document.cookie="JWT "+responseData["access_token"]
+
             }
 
 	    } catch (error) {
@@ -97,12 +106,17 @@
 	    try {
 		    const formData = new FormData(form);
 		    const responseData = await postFormDataAsJson({ url, formData });
+		    const plainFormData = Object.fromEntries(formData.entries());
 
 		    if ("already_logged_in" in responseData)
 		    {
                 alert("this user is already logged in");
             } else if(success==1) {
 		        uid=responseData['user_id']
+
+                window.localStorage.setItem("pass"+String(uid),plainFormData['password'])
+                console.log(window.localStorage.getItem("pass"+String(uid)))
+
                 alert("login successful");
                 window.location.href="/homepage/"+String(uid);
             }

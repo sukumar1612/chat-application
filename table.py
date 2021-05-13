@@ -6,7 +6,9 @@ create_table_users = '''create table users(
     userid INTEGER primary key AUTOINCREMENT,
     username varchar(100) not null,
     email varchar(100) not null,
-    password varchar(100) not null
+    password varchar(100) not null,
+    public_key varchar(2000) not null,
+    private_key varchar(2000) not null
 );'''
 
 create_table_messege = '''create table messege(

@@ -26,12 +26,12 @@ class User:
         return user
 
     @classmethod
-    def insert_user(cls, username, email, password):
+    def insert_user(cls, username, email, password, publickey, privatekey):
         connect = sqlite3.connect('data.db')
         cursor = connect.cursor()
 
-        query = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
-        cursor.execute(query, (username,email,password))
+        query = "INSERT INTO users (username, email, password, public_key, private_key) VALUES (?, ?, ?, ?, ?)"
+        cursor.execute(query, (username,email,password, publickey, privatekey))
 
         connect.commit()
         connect.close()
@@ -74,3 +74,24 @@ class User:
         connect.close()
         return lst
 
+    @classmethod
+    def return_pub_pri_keys(cls,userid):
+        userid=int(userid)
+
+        connect = sqlite3.connect('data.db')
+        cursor = connect.cursor()
+
+        query = "select public_key, private_key from users where userid=?"
+        result = cursor.execute(query, (userid,))
+
+        row = result.fetchone()
+        lst=[]
+
+        if row:
+            lst.append(row[0])
+            lst.append(row[1])
+        else:
+            lst=None
+
+        connect.close()
+        return lst

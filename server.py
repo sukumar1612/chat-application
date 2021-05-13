@@ -3,14 +3,9 @@ from flask_restful import Resource, Api
 from flask_jwt import JWT, jwt_required
 from security import authenticate, Indentity
 from models import User
-
 from flask_socketio import SocketIO
-from cryptic_module import decrypt_message, encrypt_message
-
 from threading import Lock
 
-import socket
-import sys
 
 mutex=Lock()
 
@@ -37,7 +32,8 @@ class Register(Resource):
 
     def post(self):
         data = request.get_json();
-        u=User.insert_user(data['username'], data['email'], data['password'])
+        u=User.insert_user(data['username'], data['email'], data['password'], data['publickey'], data['privatekey'])
+        print(data['publickey'],"\n\n", data['privatekey'], "\n\n", data['password'] )
         return {"messege" : "success", "username":data['username']};
 
 class Login(Resource):
@@ -98,14 +94,6 @@ def logout(name):
 
     return redirect(url_for('login'))
 
-#s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-#s.connect(("8.8.4.4", 80))
-#local_ip = s.getsockname()[0]
-#s.close()
-
-
-#app.run(host=local_ip,port=80,debug=True)
-
 
 #socket control
 
@@ -125,11 +113,18 @@ api.add_resource(chat,'/homepage/<name>/<name1>')
 def create_connection(json):
     #print(request.sid)
     print('connected')
-    print(json)
+    #print(json)
 
-    session_mapping[json['userid']]=[request.sid, json["publicKey"]]
-    json["publicKey"] = public
-    socketio.emit('connect_return', json)
+    session_mapping[json['userid']]=request.sid
+    print(session_mapping)
+    user=User.return_pub_pri_keys(json['userid'])
+    recepient=User.return_pub_pri_keys(json['recipientid'])
+
+    json['recipient_publickey']=recepient[0]
+    json['user_publickey']=user[0]
+    json['user_privatekey']=user[1]
+    print(json)
+    socketio.emit('connect_return', json, room=request.sid)
 
 def messageReceived(methods=['GET', 'POST']):
     print('message was received!!!')
@@ -137,27 +132,18 @@ def messageReceived(methods=['GET', 'POST']):
 @socketio.on('sending_text')
 def send_and_receive_text(json, methods=['GET', 'POST']):
     receiver_session_id = session_mapping[json['recepientid']]
-    user_session_id = session_mapping[json['userid']]
+
     print(str(json))
-    decrypted = decrypt_message(json['message'], private)
-    decrypted = decrypted.decode('utf-8')
 
-    encrypted = encrypt_message(decrypted, receiver_session_id[1])
-    encrypted1 = encrypt_message(decrypted, user_session_id[1])
-    json['message']=encrypted.decode('utf-8')
+    user_name_1=User.find_by_id(json['userid']).username
+    recipient_name=User.find_by_id(json['recepientid']).username
 
-    print(encrypted,"\n",decrypted)
-    json['message'] = encrypted.decode('utf-8')
-    socketio.emit('text_response', json, room=receiver_session_id[0])
-    json['message'] = encrypted1.decode('utf-8')
+    json['userid']=user_name_1
+    json['recepientid']=recipient_name
+
+    socketio.emit('text_response', json, room=receiver_session_id)
     socketio.emit('text_response', json, room=request.sid)
 
 if __name__ == '__main__':
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("8.8.4.4", 80))
-    local_ip = s.getsockname()[0]
-    s.close()
-
-    #app.run(host=local_ip,port=80,debug=True)
-    socketio.run(app, host=local_ip)
+    socketio.run(app, port=80)
 
