@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, make_response, redirect, url_
 from flask_restful import Resource, Api
 from flask_jwt import JWT, jwt_required
 from security import authenticate, Indentity
-from models import User
+from models import User, Message
 from flask_socketio import SocketIO
 from threading import Lock
 
@@ -117,32 +117,41 @@ def create_connection(json):
 
     session_mapping[json['userid']]=request.sid
     print(session_mapping)
-    user=User.return_pub_pri_keys(json['userid'])
-    recepient=User.return_pub_pri_keys(json['recipientid'])
+    text_hist=Message.find_by_userids(json['userid'], json['recipientid'])
 
-    json['recipient_publickey']=recepient[0]
+    user=User.return_pub_pri_keys(json['userid'])
+    recipient=User.return_pub_pri_keys(json['recipientid'])
+
+    json['recipient_publickey']=recipient[0]
     json['user_publickey']=user[0]
     json['user_privatekey']=user[1]
+    json['text_hist']=text_hist
+    json['mapping']={json['userid'] : User.find_by_id(json['userid']).username, json['recipientid']:User.find_by_id(json['recipientid']).username}
+
     print(json)
     socketio.emit('connect_return', json, room=request.sid)
 
-def messageReceived(methods=['GET', 'POST']):
-    print('message was received!!!')
 
 @socketio.on('sending_text')
 def send_and_receive_text(json, methods=['GET', 'POST']):
-    receiver_session_id = session_mapping[json['recepientid']]
+    receiver_session_id = json['recipientid']
 
     print(str(json))
 
     user_name_1=User.find_by_id(json['userid']).username
-    recipient_name=User.find_by_id(json['recepientid']).username
+    recipient_name=User.find_by_id(json['recipientid']).username
 
-    json['userid']=user_name_1
-    json['recepientid']=recipient_name
+    Message.insert_message(json['userid'], json['recipientid'], json['message'])
 
-    socketio.emit('text_response', json, room=receiver_session_id)
-    socketio.emit('text_response', json, room=request.sid)
+    if(receiver_session_id not in session_mapping):
+        json['userid'] = user_name_1
+        socketio.emit('text_response', json, room=request.sid)
+    else:
+        receiver_session_id = session_mapping[json['recipientid']]
+        json['userid'] = user_name_1
+        json['recipientid'] = recipient_name
+        socketio.emit('text_response', json, room=receiver_session_id)
+        socketio.emit('text_response', json, room=request.sid)
 
 if __name__ == '__main__':
     socketio.run(app, port=80)

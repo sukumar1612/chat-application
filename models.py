@@ -95,3 +95,48 @@ class User:
 
         connect.close()
         return lst
+
+
+class Message:
+    def __init__(self, content, userid, recipient_id):
+        self.content=content
+        self.userid=userid
+        self.recipient_id=recipient_id
+
+    @classmethod
+    def find_by_userids(cls, userid, recipient_id):
+        userid = int(userid)
+        recipient_id = int(recipient_id)
+
+        connect = sqlite3.connect('data.db')
+        cursor = connect.cursor()
+
+        query = "select userid, content, time_stamp from message where (userid=? and recipientid=?) or (userid=? and recipientid=?) order by time_stamp desc"
+        result = cursor.execute(query, (userid, recipient_id, recipient_id, userid))
+
+        row = result.fetchmany(30)
+        lst = []
+
+        if row:
+            for i in row:
+                lst.append(i)
+        else:
+            lst=None
+
+        connect.close()
+        return lst
+
+    @classmethod
+    def insert_message(cls, userid, recipient_id, content):
+        userid = int(userid)
+        recipient_id=int(recipient_id)
+
+        connect = sqlite3.connect('data.db')
+        cursor = connect.cursor()
+
+        query = "INSERT INTO message (userid, recipientid, content) VALUES (?, ?, ?)"
+        cursor.execute(query, (userid, recipient_id, content))
+
+        connect.commit()
+        connect.close()
+

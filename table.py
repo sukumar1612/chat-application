@@ -11,28 +11,20 @@ create_table_users = '''create table users(
     private_key varchar(2000) not null
 );'''
 
-create_table_messege = '''create table messege(
-    messege_id INTEGER primary key AUTOINCREMENT,
+create_table_message = '''create table message(
+    message_id INTEGER primary key AUTOINCREMENT,
     content varchar(500) not null,
-    Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    time_stamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     userid INTEGER not null,
-  	constraint fk_usid foreign key (userid) references user(userid)
+    recipientid INTEGER not null ,
+  	constraint fk_usid foreign key (userid) references users(userid)
+  	CONSTRAINT fk_usid_1 foreign key (recipientid) references users(userid)
 );'''
 
-create_table_conversation='''create table conversation(
-    user_id_1 INTEGER not null,
-    user_id_2 INTEGER not null,
-    messege_id INTEGER primary key,
-  	CONSTRAINT fk_usid_1 foreign key (user_id_1) references user(userid),
-  	constraint fk_usid_2 foreign key (user_id_2) references user(userid),
-  	constraint fk_msid_2 foreign key (messege_id) references messege(messege_id)
-);'''
 
-print("tables created")
 cursor.execute(create_table_users)
-cursor.execute(create_table_messege)
-cursor.execute(create_table_conversation)
-
+cursor.execute(create_table_message)
+print("tables created")
 
 connect.commit()
 connect.close()

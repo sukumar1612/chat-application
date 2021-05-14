@@ -230,6 +230,16 @@ async function decrypt_data(text, derivedKey) {
               console.log(recipient_publickey,user_publickey,user_privatekey)
               derived_key= await derive_key(recipient_publickey, user_privatekey)
               console.log(derived_key)
+              console.log(msg['text_hist'])
+              console.log(msg['mapping'])
+              if (msg['text_hist']!=null){
+                msg['text_hist']=msg['text_hist'].reverse();
+              for (txt of msg['text_hist']){
+                $( 'h3' ).remove()
+                var mess=await decrypt_data(String(txt[1]), derived_key);
+                $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg['mapping'][txt[0]]+'</b> '+ mess +'</div>' )
+              }}
+
           })
           var form = $( 'form' ).on( 'submit', async function( e ) {
             e.preventDefault()
@@ -238,15 +248,15 @@ async function decrypt_data(text, derivedKey) {
 	        var x=url.split("/");
 
 	        let userid =  String(x[x.length-2])
-            let recepientid =  String(x[x.length-1])
-            console.log(userid, recepientid)
+            let recipientid =  String(x[x.length-1])
+            console.log(userid, recipientid)
 
             let user_input = await encrypt_data($( 'input.message' ).val(), derived_key)
             console.log("messege sent"+await decrypt_data(String(user_input), derived_key)+" "+typeof(user_input))
 
             socket.emit( 'sending_text', {
               userid : userid,
-              recepientid : recepientid,
+              recipientid : recipientid,
               message : user_input
             })
             $( 'input.message' ).val( '' ).focus()
