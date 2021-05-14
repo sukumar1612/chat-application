@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    const url1 = window.location.href;
+    var uid=url1.split("/");
+
+    window.localStorage.setItem("pass"+uid[uid.length-1], "logged out")
+	alert("successfully logged out")
+    window.location.href="/login";
+
+</script>
+</body>
+</html>

@@ -26,83 +26,8 @@
     </div>
 
 
-     <script>
-      async function postFormDataAsJson({ url }) {
-
-    var jwt;
-	var x=document.cookie.split(";");
-
-    for (i of x){
-        if(i.includes("JWT ")){
-            jwt=i;
-            break;
-        }
-    }
-    console.log(jwt)
-
-	const fetchOptions = {
-		method: "POST",
-		headers: {
-			"Authorization": jwt,
-			Accept: "application/json",
-		}
-	};
-
-	const response = await fetch(url, fetchOptions);
-
-	if (!response.ok) {
-		const errorMessage = await response.text();
-		console.log("invalid token");
-		alert("Invalid JWT........redirecting to login");
-        window.location.href="/login";
-        throw new Error(errorMessage);
-
-	}
-
-	return response.json();
-}
-
-async function handleFormSubmit(event) {
-	event.preventDefault();
-
-	const url = window.location.href;
-	var x=url.split("/");
-	console.log(x[x.length-1])
-
-	try {
-		const responseData = await postFormDataAsJson({ url });
-
-		console.log({ responseData });
-		if("names" in responseData)
-        {
-          for (i of responseData["names"])
-          {
-            if(i[0]!=x[x.length-1])
-            {
-                var table = document.getElementById("myTable");
-                var row = table.insertRow(1);
-                var cell = row.insertCell(0);
-                var url1= url+ '/' +String(i[0]);
-                cell.innerHTML='<a href="'+url1+'">'+i[1]+'</a>';
-            }
-          }
-        }
-	} catch (error) {
-		console.error(error);
-	}
-}
-    window.addEventListener("load", handleFormSubmit);
-
-    function logout() {
-        const url = window.location.href;
-        var x=url.split("/");
-	    console.log(x[x.length-1])
-        window.location.href="/logout/"+x[x.length-1];
-    }
-
-
-     </script>
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="/static/home/assets/js/myscript.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
