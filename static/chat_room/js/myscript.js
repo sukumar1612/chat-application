@@ -256,7 +256,7 @@ $(document).ready(function(){
         const url = window.location.href;
         var x=url.split("/");
 
-        socket.emit( 'textmessages', {
+        socket.emit( 'connect_user', {
             userid : String(x[x.length-2]),
             recipientid : String(x[x.length-1])
         });
@@ -328,15 +328,15 @@ $(document).ready(function(){
 
 socket.on( 'text_response', async function( msg ) {
         //console.log( msg )
-        if( typeof msg.userid !== 'undefined' ) {
+        if( typeof msg.username !== 'undefined' ) {
             var mess=await decrypt_data(String(msg['message']), derived_key);
-            if(msg['userid']==you)
+            if(msg['username']==you)
             {
                 appendMessage("you", PERSON_IMG, "right", mess);
             }
             else
             {
-                appendMessage(msg['userid'], PERSON_IMG, "left", mess);
+                appendMessage(msg['username'], PERSON_IMG, "left", mess);
             }
         }
     })
