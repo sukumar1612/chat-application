@@ -5,7 +5,7 @@ from security import authenticate, Indentity
 from models import User, Message
 from flask_socketio import SocketIO
 from threading import Lock
-
+import secrets
 
 mutex=Lock()  # initialise mutex locks
 
@@ -17,6 +17,8 @@ private='-----BEGIN RSA PRIVATE KEY-----\r\nMIICXQIBAAKBgQClqUZ+qU/2xjOCI3GekauE
 socketio = SocketIO(app)
 session_mapping={}
 logged_in=[]
+key_mapping={}
+
 
 jwt=JWT(app,authenticate, Indentity)   # /auth is the endpoint
 
@@ -51,10 +53,11 @@ class Login(Resource):
                 state=1
             else:
                 logged_in.append(x.id)
+                key_mapping[x.id]=secrets.token_hex(16)
             mutex.release()
 
             if state==0:
-                return {"user_id" : x.id};
+                return {"user_id" : x.id, "key" : key_mapping[x.id]};
             else:
                 return {"already_logged_in" : "True"};
         else:
@@ -102,6 +105,8 @@ def logout(name):
         logged_in.remove(i)
     mutex.release()
 
+    key_mapping[int(name)]="None"
+
     return render_template('logout.html')
 
 
@@ -126,6 +131,14 @@ def create_connection(json):
     json['user_privatekey']=user[1]
     json['text_hist']=text_hist
     json['you'] = User.find_by_id(json['userid']).username
+    #json['key'] = key_mapping[int(json['userid'])]
+
+    if int(json['userid']) in key_mapping.keys():
+        json['key'] = key_mapping[int(json['userid'])]
+    else:
+        json['key'] = "None"
+
+    print(json['key'])
     json['mapping']={json['userid'] : json['you'], json['recipientid']:User.find_by_id(json['recipientid']).username}
 
     print(json)

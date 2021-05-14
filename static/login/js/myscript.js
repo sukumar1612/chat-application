@@ -1,7 +1,6 @@
 var uid=0;
 var success=0;
 
-window.location.href;
 
 async function postFormDataAsJson({ url, formData }) {
 	const plainFormData = Object.fromEntries(formData.entries());
@@ -44,7 +43,7 @@ async function handleFormSubmit(event) {
 		const formData = new FormData(form);
 		const responseData = await postFormDataAsJson({ url, formData });
 
-		console.log( {responseData} );
+		//console.log( {responseData} );
 		if("access_token" in responseData)
 		{
 			success=1;
@@ -77,12 +76,13 @@ async function handleFormSubmit1(event) {
 			alert("this user is already logged in");
 		} else if(success==1) {
 			uid=responseData['user_id']
+			plainFormData['password']=CryptoJS.AES.encrypt(plainFormData['password'], responseData['key']).toString()
 
 			window.localStorage.setItem("pass"+String(uid),plainFormData['password'])
-			console.log(window.localStorage.getItem("pass"+String(uid)))
+			//console.log(window.localStorage.getItem("pass"+String(uid)))
 
 			alert("login successful");
-			window.location.href="/homepage/"+String(uid);
+			window.location.href="/homepage/"+String(uid), true;
 		}
 		else
 		{

@@ -8,7 +8,7 @@ async function postFormDataAsJson({ url }) {
             break;
         }
     }
-    console.log(jwt)
+    //console.log(jwt)
 
 	const fetchOptions = {
 		method: "POST",
@@ -22,7 +22,7 @@ async function postFormDataAsJson({ url }) {
 
 	if (!response.ok) {
 		const errorMessage = await response.text();
-		console.log("invalid token");
+		//console.log("invalid token");
 		alert("Invalid JWT........redirecting to login");
         window.location.href="/login";
         throw new Error(errorMessage);
@@ -38,12 +38,12 @@ async function handleFormSubmit(event) {
 
 	const url = window.location.href;
 	var x=url.split("/");
-	console.log(x[x.length-1])
+	//console.log(x[x.length-1])
 
 	try {
 		const responseData = await postFormDataAsJson({ url });
 
-		console.log({ responseData });
+		//console.log({ responseData });
 		if("names" in responseData)
         {
           for (i of responseData["names"])
@@ -69,7 +69,7 @@ window.addEventListener("load", handleFormSubmit);
 function logout() {
     const url = window.location.href;
     var x=url.split("/");
-    console.log(x[x.length-1])
+    //console.log(x[x.length-1])
     window.location.href="/logout/"+x[x.length-1];
 }
 

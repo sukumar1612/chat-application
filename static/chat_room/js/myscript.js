@@ -67,7 +67,7 @@ async function postFormDataAsJson({ url }) {
         }
     }
 
-    console.log(jwt)
+    //console.log(jwt)
 
 	const fetchOptions = {
 		method: "POST",
@@ -81,7 +81,7 @@ async function postFormDataAsJson({ url }) {
 
 	if (!response.ok) {
 		const errorMessage = await response.text();
-		console.log("invalid token");
+		//console.log("invalid token");
 		alert("Invalid JWT........redirecting to login");
         window.location.href="/login";
         throw new Error(errorMessage);
@@ -97,12 +97,12 @@ $(window).load(async function (){
 
 	const url = window.location.href;
 	var x=url.split("/");
-	console.log(x[x.length-2])
+	//console.log(x[x.length-2])
 
 	try {
 		const responseData = await postFormDataAsJson({ url });
 
-		console.log({ responseData });
+		//console.log({ responseData });
 		if("names" in responseData)
         {
           for (i of responseData["names"])
@@ -239,9 +239,9 @@ async function decrypt_data(text, derivedKey) {
 
 $(document).ready(function(){
 
-    var socket = io.connect('http://' + document.domain + ':' + location.port);
-
     const url1 = window.location.href;
+    var socket = io.connect(window.location.origin);
+    //console.log(window.location.origin);
     var uid=url1.split("/");
 
     user_password = window.localStorage.getItem("pass"+uid[uid.length-2])
@@ -250,7 +250,7 @@ $(document).ready(function(){
         alert("unauthorised access")
         window.location.href="/login";
     }
-    console.log("password is :"+user_password)
+   // console.log("password is :"+user_password)
 
     socket.on( 'connect', function() {
         const url = window.location.href;
@@ -266,17 +266,28 @@ $(document).ready(function(){
         //console.log(msg['publicKey'])
         recipient_publickey=msg['recipient_publickey']
         user_publickey=msg['user_publickey']
-        user_privatekey=CryptoJS.AES.decrypt(msg['user_privatekey'], user_password).toString(CryptoJS.enc.Utf8);
-        console.log(recipient_publickey,user_publickey,user_privatekey)
+
+       // console.log(user_password+"   ",msg['key'])
+        if(msg['key']=="None")
+        {
+            alert("unauthorised access")
+            window.location.href="/login";
+        }
+
+        user_password=CryptoJS.AES.decrypt(user_password, msg['key']).toString(CryptoJS.enc.Utf8);
+      //  console.log(user_password)
+
+        user_privatekey=CryptoJS.AES.decrypt(msg['user_privatekey'], String(user_password)).toString(CryptoJS.enc.Utf8);
+       // console.log(recipient_publickey,user_publickey,user_privatekey)
         derived_key= await derive_key(recipient_publickey, user_privatekey)
         you = msg['you']
-        console.log("-----------------connect-------------------")
-        console.log(derived_key)
-        console.log("-----------------connect-------------------")
-        console.log(msg['text_hist'])
-        console.log("-----------------connect-------------------")
-        console.log(msg['mapping'])
-        console.log(you)
+       // console.log("-----------------connect-------------------")
+       // console.log(derived_key)
+       // console.log("-----------------connect-------------------")
+        //console.log(msg['text_hist'])
+        //console.log("-----------------connect-------------------")
+        //console.log(msg['mapping'])
+        //console.log(you)
         appenduser(you);
         var txt;
         if (msg['text_hist']!=null){
@@ -302,10 +313,10 @@ $(document).ready(function(){
 
         let userid =  String(x[x.length-2])
         let recipientid =  String(x[x.length-1])
-        console.log(userid, recipientid)
+        //console.log(userid, recipientid)
 
         let user_input = await encrypt_data($( 'input.msger-input' ).val(), derived_key)
-        console.log("messege sent"+await decrypt_data(String(user_input), derived_key)+" "+typeof(user_input))
+        //console.log("messege sent"+await decrypt_data(String(user_input), derived_key)+" "+typeof(user_input))
 
         socket.emit( 'sending_text', {
             userid : userid,
@@ -316,7 +327,7 @@ $(document).ready(function(){
     })
 
 socket.on( 'text_response', async function( msg ) {
-        console.log( msg )
+        //console.log( msg )
         if( typeof msg.userid !== 'undefined' ) {
             var mess=await decrypt_data(String(msg['message']), derived_key);
             if(msg['userid']==you)

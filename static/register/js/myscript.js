@@ -44,7 +44,7 @@ async function postFormDataAsJson({ url, formData ,x1}) {
 	plainFormData['privatekey']=CryptoJS.AES.encrypt(x1[1], plainFormData['password']).toString();
     plainFormData['password']=CryptoJS.SHA256(plainFormData['password']).toString(CryptoJS.enc.Hex);
 
-	console.log(plainFormData, typeof (plainFormData))
+	//console.log(plainFormData, typeof (plainFormData))
 
 	const formDataJsonString = JSON.stringify(plainFormData);
 
@@ -74,15 +74,15 @@ async function handleFormSubmit(event) {
 
 	const form = event.currentTarget;
 	const url = window.location.href;
-	console.log(url)
+	//console.log(url)
 
 	try {
 		const formData = new FormData(form);
 		var x1= await getkey();
-		console.log(x1[0],x1[1]);
+		//console.log(x1[0],x1[1]);
 		const responseData = await postFormDataAsJson({ url, formData ,x1});
 
-		console.log({responseData});
+		//console.log({responseData});
 		if(responseData["messege"]=="success")
 		{
 			alert("user "+responseData["username"]+" successfully registered")
