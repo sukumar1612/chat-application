@@ -9,7 +9,23 @@ A basic chat application made using flask and javascript
 Registeration page
 ![Features](https://github.com/sukumar1612/chat-application/blob/master/registeration.PNG)
 
+Login page
+![Features](https://github.com/sukumar1612/chat-application/blob/master/login.PNG)
 
+Homepage page
+![Features](https://github.com/sukumar1612/chat-application/blob/master/homepage.PNG)
+
+Chatroom page
+![Features](https://github.com/sukumar1612/chat-application/blob/master/chatroom.PNG)
+
+## Features
+User authentication and session management 
+End to End encryption using ECDH
+Passwords stored as Hash files
+One-to-one messaging
+SocketIO for sending messages 
+Built using relational database (SQLite)
+Server follows Rest principles
 
 ## Installation
 ### On Windows
