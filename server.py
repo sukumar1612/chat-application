@@ -26,8 +26,8 @@ logged_in=[]                                                                    
 key_mapping={}                                                                                                          #maps 16 byte tokens to userids
 
 
-jwt=JWT(app,authenticate, Indentity)                                                                                    #initialises jwt function ----------look into it
-                                                                                                                        # /auth is the endpoint
+jwt=JWT(app,authenticate, Indentity)                                                                                    #initialises jwt function
+                                                                                                                        # /auth is the endpoint for jwt authorisation
 
 
 #api for registeration
