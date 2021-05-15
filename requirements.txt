@@ -42,3 +42,6 @@ wincertstore==0.2
 WTForms==2.3.3
 zope.event==4.5.0
 zope.interface==5.4.0
+
+#comment this if you are deploying on localhost
+uwsgi
