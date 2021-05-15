@@ -6,16 +6,16 @@ A basic chat application made using flask and javascript
 
 #### The chat application serves the following html pages
 
-Registeration page
+- Registeration page
 ![Features](https://github.com/sukumar1612/chat-application/blob/master/registeration.PNG)
 
-Login page
+- Login page
 ![Features](https://github.com/sukumar1612/chat-application/blob/master/login.PNG)
 
-Homepage page
+- Homepage page
 ![Features](https://github.com/sukumar1612/chat-application/blob/master/homepage.PNG)
 
-Chatroom page
+- Chatroom page
 ![Features](https://github.com/sukumar1612/chat-application/blob/master/chatroom.PNG)
 
 ## Features
