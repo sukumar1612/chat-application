@@ -6,6 +6,8 @@ from models import User, Message
 from flask_socketio import SocketIO
 from threading import Lock
 import secrets
+#comment this if tables are already created
+import table
 
 #configurations
 mutex=Lock()
