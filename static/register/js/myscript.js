@@ -1,8 +1,12 @@
 //generating ECDH keys
+//reference https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto
+//see examples section for more info
+
 function ab2str(buf) {
   return String.fromCharCode.apply(null, new Uint8Array(buf));
 }
-
+// all of this is done to export the keys in PEM format
+//this function exports public key in spki format(standard format to store public key)
 async function exportpublicKey(key) {
   const exported = await window.crypto.subtle.exportKey(
       "spki",
@@ -14,6 +18,7 @@ async function exportpublicKey(key) {
   return pemExported;
 }
 
+//this function exports the private key in pksc8 format(standard format to store private key) i
 async function exportprivateKey(key) {
   const exported = await window.crypto.subtle.exportKey(
     "pkcs8",
@@ -25,7 +30,7 @@ async function exportprivateKey(key) {
   return pemExported;
 }
 
-
+//it generates the public private key pair
 async function getkey(){
     const keyPair = await window.crypto.subtle.generateKey({name: "ECDH", namedCurve: "P-256",}, true, ["deriveKey", "deriveBits"]);
     const publicKeyJwk = await exportpublicKey(keyPair.publicKey);
@@ -37,6 +42,7 @@ async function getkey(){
 
 
 //sending and receiving data
+//sends data over to the server to be stored in the database it includes username, email, password(hashed with sha256), public key and privatekey(encrypted with AES)
 async function postFormDataAsJson({ url, formData ,x1}) {
 	const plainFormData = Object.fromEntries(formData.entries());
 
@@ -67,8 +73,8 @@ async function postFormDataAsJson({ url, formData ,x1}) {
 }
 
 
-
-
+//prevents the submission of the form from doing the default and instead takes over
+// waits for response from the server and then redirects user to login page
 async function handleFormSubmit(event) {
 	event.preventDefault();
 
@@ -93,6 +99,7 @@ async function handleFormSubmit(event) {
 	}
 }
 
+// this is if the user has already registered he can manually go back to the login page
 function newLoc(){
 	window.location.href="/login";
 }

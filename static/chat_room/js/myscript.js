@@ -125,6 +125,11 @@ $(window).load(async function (){
 
 //e2ee encryption functions
 
+//generating ECDH keys
+//reference https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto
+//see examples section for more info
+// summary of the functions : it takes in keys in PEM format and converts them into a format of type Crypto
+
 function str2ab(str) {
   const buf = new ArrayBuffer(str.length);
   const bufView = new Uint8Array(buf);
@@ -178,6 +183,8 @@ function importPublicKey(pem) {
     );
 }
 
+
+//takes recipient public key and user private key and generates shared key
 async function derive_key(publicKeyJwk, privateKeyJwk){
   const publicKey = await importPublicKey(publicKeyJwk)
 
@@ -192,7 +199,7 @@ async function derive_key(publicKeyJwk, privateKeyJwk){
   );
 };
 
-
+//encrypts data using AES encryption and accepts shared key as password
 async function encrypt_data(text, derivedKey){
   const encodedText = new TextEncoder().encode(text);
 
@@ -211,7 +218,7 @@ async function encrypt_data(text, derivedKey){
   return base64Data;
 };
 
-
+//decrypts AES encrypted data
 async function decrypt_data(text, derivedKey) {
   try {
 
@@ -235,8 +242,7 @@ async function decrypt_data(text, derivedKey) {
   }
 };
 
-      //websockets part
-
+//websockets(socketio) part
 $(document).ready(function(){
 
     const url1 = window.location.href;
@@ -244,14 +250,14 @@ $(document).ready(function(){
     //console.log(window.location.origin);
     var uid=url1.split("/");
 
-    user_password = window.localStorage.getItem("pass"+uid[uid.length-2])
+    user_password = window.localStorage.getItem("pass"+uid[uid.length-2])                                           //retrives password from local storage (encrypted)
     if(user_password=="logged out")
     {
         alert("unauthorised access")
         window.location.href="/login";
     }
    // console.log("password is :"+user_password)
-
+                                                                                                                        //establishes socket connection and sends userid and recipient id
     socket.on( 'connect', function() {
         const url = window.location.href;
         var x=url.split("/");
@@ -262,7 +268,8 @@ $(document).ready(function(){
         });
 
     })
-    socket.on( 'connect_return', async function(msg) {
+                                                                                                                        //receives info such as username,recipientid, 16byte hex token,
+    socket.on( 'connect_return', async function(msg) {                                                                  //chat history and the required ECDH keys
         //console.log(msg['publicKey'])
         recipient_publickey=msg['recipient_publickey']
         user_publickey=msg['user_publickey']
@@ -278,9 +285,12 @@ $(document).ready(function(){
       //  console.log(user_password)
 
         user_privatekey=CryptoJS.AES.decrypt(msg['user_privatekey'], String(user_password)).toString(CryptoJS.enc.Utf8);
+
        // console.log(recipient_publickey,user_publickey,user_privatekey)
+
         derived_key= await derive_key(recipient_publickey, user_privatekey)
         you = msg['you']
+
        // console.log("-----------------connect-------------------")
        // console.log(derived_key)
        // console.log("-----------------connect-------------------")
@@ -288,6 +298,7 @@ $(document).ready(function(){
         //console.log("-----------------connect-------------------")
         //console.log(msg['mapping'])
         //console.log(you)
+
         appenduser(you);
         var txt;
         if (msg['text_hist']!=null){
@@ -296,7 +307,7 @@ $(document).ready(function(){
                 var mess=await decrypt_data(String(txt[1]), derived_key);
                 if(msg['mapping'][txt[0]]==you)
                 {
-                    appendMessage(msg['mapping'][txt[0]], PERSON_IMG, "right", mess);
+                    appendMessage("you", PERSON_IMG, "right", mess);
                 }
                 else
                 {
@@ -305,9 +316,9 @@ $(document).ready(function(){
             }}
 
     })
-    var form = $( 'form' ).on( 'submit', async function( e ) {
-        e.preventDefault()
-
+    var form = $( 'form' ).on( 'submit', async function( e ) {                                                          //on submission of form it extracts message and
+        e.preventDefault()                                                                                              //performs encryption then sends along with info like userid and
+                                                                                                                        //recipient id
         const url = window.location.href;
         var x=url.split("/");
 
@@ -326,7 +337,7 @@ $(document).ready(function(){
         $( 'input.msger-input' ).val( '' ).focus()
     })
 
-socket.on( 'text_response', async function( msg ) {
+socket.on( 'text_response', async function( msg ) {                                                                     //receives message and decrypts it
         //console.log( msg )
         if( typeof msg.username !== 'undefined' ) {
             var mess=await decrypt_data(String(msg['message']), derived_key);

@@ -44,7 +44,7 @@ async function handleFormSubmit(event) {
 		const responseData = await postFormDataAsJson({ url });
 
 		//console.log({ responseData });
-		if("names" in responseData)
+		if("names" in responseData)                                                                                     //inserts usernames into the table
         {
           for (i of responseData["names"])
           {
