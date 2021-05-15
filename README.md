@@ -19,21 +19,21 @@ Chatroom page
 ![Features](https://github.com/sukumar1612/chat-application/blob/master/chatroom.PNG)
 
 ## Features
-User authentication and session management 
+- User authentication and session management 
 
-End to End encryption using ECDH
+- End to End encryption using ECDH
 
-Passwords stored as Hash files
+- Passwords stored as Hash files
 
-One-to-one messaging
+- One-to-one messaging
 
-SocketIO for sending messages 
+- SocketIO for sending messages 
 
-Messages are stored in the database encrypted
+- Messages are stored in the database encrypted
 
-Built using relational database (SQLite)
+- Built using relational database (SQLite)
 
-Server follows Rest principles
+- Server follows Rest principles
 
 ## Installation
 ### On Windows
