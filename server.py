@@ -7,7 +7,7 @@ from flask_socketio import SocketIO
 from threading import Lock
 import secrets
 #comment this if tables are already created
-import table
+#import table
 
 #configurations
 mutex=Lock()
