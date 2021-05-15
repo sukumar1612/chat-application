@@ -74,6 +74,7 @@ python server.py
 
 - Open the browser and type 127.0.0.1 then press Enter
 - Register user by clicking the link below the log in button in the login page
+- Register atleast 2 users before testing the project
 - Put correct username and password in the login page
 - Log in to see the list of users
 - select a user and chat 
