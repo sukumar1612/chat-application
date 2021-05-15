@@ -1,6 +1,13 @@
 # Chat application
 
-A basic chat application made using flask and javascript and has E2EE for messages 
+A basic chat application made using flask and javascript
+
+## Overview
+
+#### The chat application serves the following html pages
+
+Registeration page
+
 
 ## Installation
 ### On Windows
@@ -33,10 +40,6 @@ pip install -r requirements.txt
 
 ## Usage
 #### Inside virtual environment
-Create the database
-```bash
-python tables.py
-```
 
 Run the server
 ```bash
