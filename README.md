@@ -37,28 +37,28 @@ Chatroom page
 
 ## Installation
 ### On Windows
-1)Install anaconda
+- Install anaconda
 
-2)Open cmd
+- Open cmd
 
-3)Create a virtual environment using conda
+- Create a virtual environment using conda
 ```bash
 conda create -n environment_name
 ```
 
-4)Activate virtual environment
+- Activate virtual environment
 ```bash
 conda activate environment_name
 ```
 
-5)Install python version 3.9.4
+- Install python version 3.9.4
 ```bash
 conda install python=3.9.4
 ```
 
 #### To run on local machine comment uwsgi in requirements.txt
 
-6)Install necessary packages inside virtual environment
+- Install necessary packages inside virtual environment
 ```bash
 pip install -r requirements.txt
 ```
@@ -67,12 +67,12 @@ pip install -r requirements.txt
 ## Usage
 #### Inside virtual environment
 
-Run the server
+- Run the server
 ```bash
 python server.py
 ```
 
-Open the browser and type 127.0.0.1 then press Enter
+- Open the browser and type 127.0.0.1 then press Enter
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
