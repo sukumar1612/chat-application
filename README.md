@@ -20,12 +20,19 @@ Chatroom page
 
 ## Features
 User authentication and session management 
+
 End to End encryption using ECDH
+
 Passwords stored as Hash files
+
 One-to-one messaging
+
 SocketIO for sending messages 
+
 Messages are stored in the database encrypted
+
 Built using relational database (SQLite)
+
 Server follows Rest principles
 
 ## Installation
