@@ -32,14 +32,18 @@ pip install -r requirements.txt
 
 
 ## Usage
-
-```python
-import foobar
-
-foobar.pluralize('word') # returns 'words'
-foobar.pluralize('goose') # returns 'geese'
-foobar.singularize('phenomena') # returns 'phenomenon'
+#### Inside virtual environment
+Create the database
+```bash
+python tables.py
 ```
+
+Run the server
+```bash
+python server.py
+```
+
+Open the browser and type 127.0.0.1 then press Enter
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
