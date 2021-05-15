@@ -282,7 +282,7 @@ $(document).ready(function(){
         }
 
         user_password=CryptoJS.AES.decrypt(user_password, msg['key']).toString(CryptoJS.enc.Utf8);
-      //  console.log(user_password)
+        console.log(user_password)
 
         user_privatekey=CryptoJS.AES.decrypt(msg['user_privatekey'], String(user_password)).toString(CryptoJS.enc.Utf8);
 
@@ -294,7 +294,7 @@ $(document).ready(function(){
        // console.log("-----------------connect-------------------")
        // console.log(derived_key)
        // console.log("-----------------connect-------------------")
-        //console.log(msg['text_hist'])
+        console.log(msg['text_hist'])
         //console.log("-----------------connect-------------------")
         //console.log(msg['mapping'])
         //console.log(you)
