@@ -1,6 +1,6 @@
 # Chat application
 
-A basic chat application made using flask and javascript
+A basic chat application made using flask
 
 ## Overview
 
