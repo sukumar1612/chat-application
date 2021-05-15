@@ -4,28 +4,28 @@ A basic chat application made using flask and javascript and has E2EE for messag
 
 ## Installation
 ### On Windows
-Install anaconda
+1)Install anaconda
 
-Open cmd
+2)Open cmd
 
-Create a virtual environment using conda
+3)Create a virtual environment using conda
 ```bash
 conda create -n environment_name
 ```
 
-Activate virtual environment
+4)Activate virtual environment
 ```bash
 conda activate environment_name
 ```
 
-Install python version 3.9.4
+5)Install python version 3.9.4
 ```bash
 conda install python=3.9.4
 ```
 
-####To run on local machine comment uwsgi in requirements.txt
+#### To run on local machine comment uwsgi in requirements.txt
 
-Install necessary packages inside virtual environment
+6)Install necessary packages inside virtual environment
 ```bash
 pip install -r requirements.txt
 ```
