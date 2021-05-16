@@ -87,7 +87,9 @@ python server.py
 - I have deployed the server to heroku and to access it this is the link [Flask-chat server](https://flask-chat.herokuapp.com)
 
 ## Disclaimer
-#### When user closes the tab after login in and not using the dedicated logout button then the user still appears as logged in so use the Force logout link in the login page
+#### - When user closes the tab after login in and not using the dedicated logout button then the user still appears as logged in so use the Force logout link in the login page
+#### - An alert pops up after every successful transaction like successful login or registeration so if an alert doesn't show up immediately ,please wait as the heroku server might be slow (for free users)
+
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
