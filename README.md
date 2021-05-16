@@ -12,6 +12,9 @@ A basic chat application made using flask
 - Login page
 ![Features](https://github.com/sukumar1612/chat-application/blob/master/login.PNG)
 
+- Force Logout page
+![Features](https://github.com/sukumar1612/chat-application/blob/master/force_logout.PNG)
+
 - Homepage page
 ![Features](https://github.com/sukumar1612/chat-application/blob/master/homepage.PNG)
 
