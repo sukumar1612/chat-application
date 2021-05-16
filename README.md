@@ -82,6 +82,9 @@ python server.py
 - Log in to see the list of users
 - select a user and chat 
 
+## Disclaimer
+#### When user closes the tab after login in and not using the dedicated logout button then the user still appears as logged in so use the Force logout link in the login page
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
