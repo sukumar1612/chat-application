@@ -38,9 +38,14 @@ class Register(Resource):
 
     def post(self):                                                                                                     #inserts data from the submitted form into user table
         data = request.get_json();
-        u=User.insert_user(data['username'], data['email'], data['password'], data['publickey'], data['privatekey'])
-        #print(data['publickey'],"\n\n", data['privatekey'], "\n\n", data['password'] )
-        return {"messege" : "success", "username":data['username']};
+
+        username=User.find_by_username(data['username'])                                                                #to check if username already exists
+        if(username==None):
+            u=User.insert_user(data['username'], data['email'], data['password'], data['publickey'], data['privatekey'])
+            #print(data['publickey'],"\n\n", data['privatekey'], "\n\n", data['password'] )
+            return {"messege" : "success", "username":data['username']};
+        else:
+            return {"messege": "username already exists"};
 
 #api for login
 class Login(Resource):
@@ -96,9 +101,32 @@ class chat(Resource):
         return {"authenticated":"True"}
 
 
+class logout_force(Resource):
+    def get(self):
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('logout_force.html'), 200, headers)
+
+    def post(self):
+        data = request.get_json();
+        username = authenticate(data['username'],data['password'])
+        if(username!=None):
+            mutex.acquire()
+            i=username.id
+            if i in logged_in:
+                logged_in.remove(i)  # removes username from logged_in list
+            mutex.release()
+
+            key_mapping[i] = "None"  # removex 16 byte hex token created
+
+            return {"message" : "successful"}
+        else:
+            return {"message" : "invalid username or password"}
+
+
 @app.route("/")
 def red():                                                                                                              #redirects user from / to /login
     return redirect(url_for('login'))
+
 
 @app.route("/logout/<name>")
 def logout(name):                                                                                                       #performs logout operations
@@ -176,6 +204,7 @@ def send_and_receive_text(json, methods=['GET', 'POST']):
 
 api.add_resource(Register, '/register')
 api.add_resource(Login, '/login')
+api.add_resource(logout_force, '/logout')
 api.add_resource(homepage,'/homepage/<name>')
 api.add_resource(chat,'/homepage/<name>/<name1>')
 

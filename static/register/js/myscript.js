@@ -93,6 +93,8 @@ async function handleFormSubmit(event) {
 		{
 			alert("user "+responseData["username"]+" successfully registered")
 			window.location.href="/login";
+		}else if(responseData["messege"]=="username already exists"){
+			alert ("Username already exists")
 		}
 	} catch (error) {
 		console.error(error);
