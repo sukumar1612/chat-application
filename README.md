@@ -82,6 +82,10 @@ python server.py
 - Log in to see the list of users
 - select a user and chat 
 
+## Heroku Deployment Link
+
+- I have deployed the server to heroku and to access it this is the link [Flask-chat server](https://flask-chat.herokuapp.com)
+
 ## Disclaimer
 #### When user closes the tab after login in and not using the dedicated logout button then the user still appears as logged in so use the Force logout link in the login page
 
